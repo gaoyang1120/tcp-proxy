@@ -1,0 +1,73 @@
+<div class="row">
+    <div class="col s1">
+        <h5 class="left">监控</h5>
+    </div>
+    <div class="col s11">
+        <div class="switch right">
+            <label>
+                禁用
+                <input type="checkbox" ng-model="proxy.active" ng-change="toggleStatus(proxy.active)">
+                <span class="lever"></span>
+                启用
+            </label>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col s3">
+        <h6>{{proxy.alias}} @ {{proxy.localPort}}</h6>
+    </div>
+    <div class="col s3">
+        <h6>远程地址: {{proxy.remoteHost}} @ {{proxy.remotePort}}</h6>
+    </div>
+</div>
+<div class="row">
+    <div class="row">
+        <div class="chart-container col s4">
+            <canvas id="connectionCount-chart" class="chart chart-line chart-xl ng-isolate-scope"
+                    chart-data="connectionCount" chart-options="options" chart-labels="labels"></canvas>
+        </div>
+        <div class="chart-container col s4">
+            <canvas id="received-chart" class="chart chart-line chart-xl ng-isolate-scope" chart-data="received"
+                    chart-options="options" chart-labels="labels"></canvas>
+        </div>
+        <div class="chart-container col s4">
+            <canvas id="sent-chart" chart-colours="sentColors" class="chart chart-line chart-xl ng-isolate-scope"
+                    chart-data="sent" chart-options="options" chart-labels="labels"></canvas>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col s4 center-align">连接数量</div>
+        <div class="col s4 center-align">接收 (Kb)</div>
+        <div class="col s4 center-align">发送 (Kb)</div>
+    </div>
+
+</div>
+<!--
+<div class="row">
+    <div class="col s1"></div>
+    <div class="col s11">
+        <div class="section">
+            <h5>流量控制</h5>
+            <div class="divider"></div>
+            <div class="collapsible-header">带宽限制</div>
+              <div class="form-group valign-wrapper">
+                  <div class="input-field col s2">
+                      <input type="text" class="validate" id="receiveLimit"  ng-model="proxy.qos.trafficShaping.writeLimit" required>
+                      <label for="receiveLimit">接收限制</label>
+                  </div>
+                  <div class="input-field col s2">
+                      <input type="text" class="validate" id="sentLimit"  ng-model="proxy.qos.trafficShaping.readLimit" required>
+                      <label for="sentLimit">发送限制</label>
+                  </div>
+                  <div class="valign col s2">
+                      <input type="submit" value="应用" class="waves-effect waves-light btn" ng-click="applyChanges()"/>
+                  </div>
+                  <div class="col s6"></div>
+              </div>
+        </div>
+    </div>
+
+</div>
+-->
+

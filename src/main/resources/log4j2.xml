@@ -1,0 +1,26 @@
+<!--TRACE-->
+<configuration status="INFO" monitorInterval="10" >
+    <properties>
+        <property name="LOG_HOME">./</property>
+    </properties>
+    <appenders>
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level - %class - %msg%n"/>
+        </Console>
+        <RollingFile name="RUN-LOG" fileName="${LOG_HOME}/proxy-log/current.log"
+                     filePattern="${LOG_HOME}/proxy-log/$${date:yyyy-MM}/proxy_%d{yyyyMMdd}.log">
+            <!--<ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>-->
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level - %msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
+                <!--<SizeBasedTriggeringPolicy size="100 MB"/>-->
+            </Policies>
+        </RollingFile>
+    </appenders>
+    <loggers>
+        <Root level="info">
+            <AppenderRef ref="STDOUT"/>
+            <AppenderRef ref="RUN-LOG"/>
+        </Root>
+    </loggers>
+</configuration>

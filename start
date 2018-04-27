@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+java -Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.EPollSelectorProvider -jar tcp-proxy.jar
