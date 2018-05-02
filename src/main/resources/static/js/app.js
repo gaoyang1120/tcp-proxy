@@ -1,4 +1,4 @@
-var tcpproxy = angular.module('nanoproxy', ['ngRoute','ui.materialize','pageslide-directive','chart.js'])
+var tcpproxy = angular.module('tcpproxy', ['ngRoute','ui.materialize','pageslide-directive','chart.js'])
 
 tcpproxy.config(function ($routeProvider, $httpProvider) {
     $routeProvider

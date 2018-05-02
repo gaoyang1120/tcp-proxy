@@ -1,4 +1,4 @@
-var tcpproxy = angular.module('nanoproxy');
+var tcpproxy = angular.module('tcpproxy');
 tcpproxy.controller('proxy', function($scope, $routeParams, $http, $interval){
 
     $scope.promise = {}

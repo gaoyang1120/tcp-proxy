@@ -29,6 +29,8 @@ public class ProxyDefinition extends ProxyInfo {
         setLocalPort(request.getLocalPort());
         setAlias(request.getAlias());
         setActive(request.isActive());
+        setDebug(request.isDebug());
+        setDelete(request.isDelete());
 
     }
 

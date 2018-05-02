@@ -18,4 +18,10 @@ public interface ServerService {
 	Set<ProxyDefinition> listServers();
 	ConnectionStats getStats(String id);
 	void configureTraffic(String id, TrafficShaping config);
+
+    void stopDebug(String id);
+
+	void startDebug(String id);
+
+	ProxyDefinition delete(String id);
 }

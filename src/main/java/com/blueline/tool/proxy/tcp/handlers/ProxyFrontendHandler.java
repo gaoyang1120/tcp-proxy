@@ -9,13 +9,37 @@ import io.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.LinkedList;
+
 
 public class ProxyFrontendHandler extends ChannelInboundHandlerAdapter {
 
     static final Logger logger = LoggerFactory.getLogger(ProxyFrontendHandler.class);
 
     private ProxyDefinition proxyDefinition;
-    private volatile Channel outboundChannel;
+    private Channel outboundChannel;
+
+    public Channel getInboundChannel() {
+        return inboundChannel;
+    }
+
+    private Channel inboundChannel;
+
+    private LinkedList<Object> inboundMsgBuffer = new LinkedList<Object> ();
+
+    private ConnectionStatus connectStatus = ConnectionStatus.init;
+
+    public void setAutoRead(boolean b) {
+        inboundChannel.config().setAutoRead(b);
+    }
+
+    enum ConnectionStatus{
+        init,
+        outBoundChnnlConnecting,      //inbound connected and outbound connecting
+        outBoundChnnlReady,           //inbound connected and outbound connected
+        closing                       //closing inbound and outbound connection
+    }
+
 
     public ProxyFrontendHandler(ProxyDefinition proxyDefinition) {
         this.proxyDefinition = proxyDefinition;
@@ -26,25 +50,30 @@ public class ProxyFrontendHandler extends ChannelInboundHandlerAdapter {
         proxyDefinition.getConnectionStats().increaseConnectionCount();
 //        logger.info("channelActive connection count : {}", proxyDefinition.getConnectionStats().getConnectionCount());
 
-        final Channel inboundChannel = ctx.channel();
+        inboundChannel = ctx.channel();
         // Start the connection attempt.
         Bootstrap b = new Bootstrap();
         b.group(inboundChannel.eventLoop())
                 .channel(ctx.channel().getClass())
-                .handler(new ProxyBackendHandler(inboundChannel, proxyDefinition))
+                .handler(new ProxyBackendHandler(this, proxyDefinition))
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 30*1000)
+                .option(ChannelOption.SO_KEEPALIVE, true)
+                .option(ChannelOption.SO_REUSEADDR, true)
                 .option(ChannelOption.AUTO_READ, false);
+
+
+
         ChannelFuture f = b.connect(proxyDefinition.getRemoteHost(), proxyDefinition.getRemotePort());
+        connectStatus = ConnectionStatus.outBoundChnnlConnecting;
         outboundChannel = f.channel();
+
         f.addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) {
-                if (future.isSuccess()) {
-                    // connection complete start to read first data
-                    inboundChannel.read();
-                } else {
+                if (!future.isSuccess()) {
                     // Close the connection if the connection attempt has failed.
                     future.cause().printStackTrace();
-                    inboundChannel.close();
+                    close();
                 }
             }
         });
@@ -52,51 +81,71 @@ public class ProxyFrontendHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) {
-//        outboundChannel.isOpen()
-        if (outboundChannel.isOpen()) {
-            if (ByteBuf.class.isAssignableFrom(msg.getClass())) {
-                proxyDefinition.getConnectionStats().appendBytesSent(((ByteBuf) msg).capacity());
-            }
-            outboundChannel.writeAndFlush(msg).addListener(new ChannelFutureListener() {
-                @Override
-                public void operationComplete(ChannelFuture future) {
-                    if (future.isSuccess()) {
-                        // was able to flush out data, start to read the next chunk
-                        ctx.channel().read();
-                    } else {
-                        future.cause().printStackTrace();
-                        future.channel().close();
-                    }
-                }
-            });
-        } else {
 
+
+        switch(connectStatus){
+            case outBoundChnnlReady:
+                outboundChannel.writeAndFlush(msg);
+                break;
+            case closing:
+                release(msg);
+                break;
+            case init:
+                logger.error("Bad connectStatus.");
+                close();
+                break;
+            case outBoundChnnlConnecting:
+            default:
+                inboundMsgBuffer.add(msg);
         }
+
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-        if (outboundChannel != null) {
-            closeOnFlush(outboundChannel);
-        }
+
+        close();
         proxyDefinition.getConnectionStats().decreaseConnectionCount();
-//        logger.info("channelInactive connection count : {}", proxyDefinition.getConnectionStats().getConnectionCount());
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        logger.warn(proxyDefinition.getAlias(),cause);
-        cause.printStackTrace();
-        closeOnFlush(ctx.channel());
+        logger.warn("FrontendHandler connection is abnormally disconnected {}:{}",proxyDefinition.getAlias(),cause.getMessage());
+        logger.debug("Stack information:",cause.getMessage());
+        close();
     }
 
-    /**
-     * Closes the specified channel after all queued write requests are flushed.
-     */
+    public void close() {
+        connectStatus = ConnectionStatus.closing;
+        for(Object obj : inboundMsgBuffer){
+            release(obj);
+        }
+        inboundMsgBuffer.clear();
+        closeOnFlush(inboundChannel);
+        closeOnFlush(outboundChannel);
+    }
+
+    private void release(Object obj){
+        if(obj instanceof ByteBuf){
+            ((ByteBuf)obj).release();
+        }
+    }
+
+
     static void closeOnFlush(Channel ch) {
         if (ch.isActive()) {
             ch.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
         }
+    }
+
+    public void outBoundChannelReady() {
+        inboundChannel.config().setAutoRead(true);
+        outboundChannel.config().setAutoRead(true);
+        connectStatus = ConnectionStatus.outBoundChnnlReady;
+        for(Object obj : inboundMsgBuffer){
+            outboundChannel.writeAndFlush(obj);
+        }
+        inboundMsgBuffer.clear();
     }
 
 

@@ -75,4 +75,15 @@ public class ProxyInfoStorageServiceJsonFileImpl implements ProxyInfoStorageServ
             logger.warn("The specified proxy information directory does not exist :{}",autoLoadDataPath);
         }
     }
+
+    public void deleteProxyInfo(ProxyInfo proxyInfo){
+        File autoLoadData = new File(autoLoadDataPath);
+        try {
+            File proxyInfoFile=new File(autoLoadData.getCanonicalPath()+"/"+proxyInfo.getLocalPort());
+            proxyInfoFile.delete();
+        } catch (IOException e) {
+            logger.warn("The specified proxy information directory does not exist :{}",autoLoadDataPath);
+        }
+
+    }
 }

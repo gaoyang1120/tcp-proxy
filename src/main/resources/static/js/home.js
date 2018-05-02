@@ -1,4 +1,4 @@
-var tcpproxy = angular.module('nanoproxy');
+var tcpproxy = angular.module('tcpproxy');
 
 tcpproxy.controller('home',function($scope, $http){
     $scope.proxies = [];
@@ -20,5 +20,31 @@ tcpproxy.controller('home',function($scope, $http){
 
         })
     });
+
+    $scope.toggleStatus = function(id,$event){
+        $http.post('/servers/'+id+'/status',{active: $event}).then(function success(response){
+
+        }, function error(response){
+            console.error(response);
+        });
+    }
+    $scope.toggleDebug = function(id,$event){
+        $http.post('/servers/'+id+'/debug',{debug: $event}).then(function success(response){
+
+        }, function error(response){
+            console.error(response);
+        });
+    }
+
+    $scope.deleteServer = function(id){
+        $http.delete('/servers/'+id).then(function success(response){
+            $scope.proxies.forEach(function(p){
+                if(p.id==id)
+                    p.delete=true;
+            });
+        }, function error(response){
+            console.error(response);
+        });
+    }
 
 });

@@ -23,7 +23,7 @@
     </form>
 </div>
 <div class="row">
-    <table class="highlight bordered striped responsive-table" >
+    <table class="highlight bordered responsive-table" >
         <thead>
         <tr>
 
@@ -31,20 +31,49 @@
             <th>本地端口</th>
             <th>远程主机</th>
             <th>远程端口</th>
+            <th>调试模式</th>
             <th>状态</th>
+            <th>操作</th>
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="proxy in proxies">
-            <td><a href="#/proxy/{{proxy.id}}">{{proxy.alias}}</a></td>
+        <tr ng-repeat="proxy in proxies" ng-if="!proxy.delete">
+            <td>
+                <div ng-if="proxy.active"><a href="#/proxy/{{proxy.id}}">{{proxy.alias}}</a></div>
+                <div ng-if="!proxy.active">{{proxy.alias}}</div>
+            </td>
             <td>{{proxy.localPort}}</td>
             <td>{{proxy.remoteHost}}</td>
             <td>{{proxy.remotePort}}</td>
             <td>
-                <div ng-if="proxy.active"><img src="/images/on.png"></div>
-                <div ng-if="!proxy.active"><img src="/images/off.png"></div>
+                <div class="switch">
+                <label>
+                    禁用
+                    <input type="checkbox" ng-model="proxy.debug" ng-change="toggleDebug(proxy.id,proxy.debug)">
+                    <span class="lever"></span>
+                    启用
+                </label>
+            </div>
             </td>
-        </tr>
+            <td>
+                 <div class="switch">
+                    <label>
+                        禁用
+                        <input type="checkbox" ng-model="proxy.active" ng-change="toggleStatus(proxy.id,proxy.active)">
+                        <span class="lever"></span>
+                        启用
+                    </label>
+                </div>
+            </td>
+            <td >
+                <div ng-if="!proxy.active">
+                    <a class="waves-effect waves-light btn red" ng-click="deleteServer(proxy.id)" >删除</a>
+                </div>
+                <div ng-if="proxy.active">
+                    <a class="waves-effect waves-light btn red disabled">删除</a>
+                </div>
+            </td>
+           </tr>
         </tbody>
     </table>
 </div>

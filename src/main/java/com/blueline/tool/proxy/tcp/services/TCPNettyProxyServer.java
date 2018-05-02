@@ -2,16 +2,14 @@ package com.blueline.tool.proxy.tcp.services;
 
 
 import com.blueline.tool.proxy.tcp.domain.ProxyDefinition;
-import com.blueline.tool.proxy.tcp.handlers.ProxyFrontendHandler;
 import com.blueline.tool.proxy.tcp.handlers.ProxyInitializer;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 
 
 public class TCPNettyProxyServer extends AbstractNettyProxyServer {
@@ -23,11 +21,14 @@ public class TCPNettyProxyServer extends AbstractNettyProxyServer {
 	@Override
 	protected Channel doStart(EventLoopGroup bossGroup, EventLoopGroup workerGroup) {
 		ServerBootstrap bootstrap = new ServerBootstrap();
-		final ProxyFrontendHandler frontendHandler = new ProxyFrontendHandler(definition);
+//		final ProxyFrontendHandler frontendHandler = new ProxyFrontendHandler(definition);
 		ChannelFuture cf = bootstrap.group(bossGroup,workerGroup)
-				.option(ChannelOption.SO_REUSEADDR,false)
 				.channel(NioServerSocketChannel.class)
-				.handler(new LoggingHandler(LogLevel.INFO))
+				.option(ChannelOption.SO_BACKLOG, 50)
+				.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 30*1000)
+				.option(ChannelOption.SO_REUSEADDR,true)
+				.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+				.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 				.childHandler(new ProxyInitializer(definition,trafficHandler))
 				.childOption(ChannelOption.AUTO_READ,true)
 				.bind(definition.getLocalPort());

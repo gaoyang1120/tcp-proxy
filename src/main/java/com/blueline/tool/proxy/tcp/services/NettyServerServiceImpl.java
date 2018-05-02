@@ -55,6 +55,23 @@ public class NettyServerServiceImpl implements ServerService {
 	}
 
 	@Override
+	public void stopDebug(String id) {
+		findServer(id).getDefinition().setDebug(false);
+	}
+
+	@Override
+	public void startDebug(String id) {
+		findServer(id).getDefinition().setDebug(true);
+	}
+
+	@Override
+	public ProxyDefinition delete(String id) {
+		NettyProxyServer nettyProxyServer=servers.remove(id);
+		nettyProxyServer.stop();
+		return nettyProxyServer.getDefinition();
+	}
+
+	@Override
 	public ProxyDefinition getProxyDefinition(String id) {
 		return findServer(id).getDefinition();
 	}

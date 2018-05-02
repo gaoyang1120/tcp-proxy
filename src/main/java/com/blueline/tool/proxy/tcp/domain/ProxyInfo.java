@@ -21,6 +21,16 @@ public class ProxyInfo{
     private Qos qos;
     private boolean active;
 
+    public boolean isDelete() {
+        return delete;
+    }
+
+    public void setDelete(boolean delete) {
+        this.delete = delete;
+    }
+
+    private boolean delete;
+
     public boolean isActive() {
         return active;
     }
@@ -74,5 +84,18 @@ public class ProxyInfo{
 
     public void setQos(Qos qos) {
         this.qos = qos;
+    }
+
+    @Override
+    public String toString() {
+        return "ProxyInfo{" +
+                "id='" + id + '\'' +
+                ", alias='" + alias + '\'' +
+                ", localPort=" + localPort +
+                ", remotePort=" + remotePort +
+                ", remoteHost='" + remoteHost + '\'' +
+                ", debug=" + debug +
+                ", active=" + active +
+                '}';
     }
 }
