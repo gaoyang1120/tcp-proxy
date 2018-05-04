@@ -41,11 +41,11 @@ public abstract class AbstractNettyProxyServer implements NettyProxyServer {
 	public void stop() {
 		if(serverChannel != null && running){
 			logger.info("Shutting down server: {} on port {}",definition.getId(),definition.getLocalPort());
+			definition.setActive(false);
 			serverChannel.close().addListener(new GenericFutureListener<Future<? super Void>>() {
 				@Override
 				public void operationComplete(Future<? super Void> future) throws Exception {
 					running = false;
-					definition.setActive(false);
 					serverChannel = null;
 					logger.info("Server {} shutdown complete",definition.getId());
 				}
