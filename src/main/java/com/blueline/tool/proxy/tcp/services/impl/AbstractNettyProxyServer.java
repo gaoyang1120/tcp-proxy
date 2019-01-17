@@ -1,9 +1,11 @@
-package com.blueline.tool.proxy.tcp.services;
+package com.blueline.tool.proxy.tcp.services.impl;
 
 
 import com.blueline.tool.proxy.tcp.domain.ConnectionStats;
 import com.blueline.tool.proxy.tcp.domain.ProxyDefinition;
 import com.blueline.tool.proxy.tcp.domain.TrafficShaping;
+import com.blueline.tool.proxy.tcp.services.NettyProxyServer;
+
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.handler.traffic.AbstractTrafficShapingHandler;

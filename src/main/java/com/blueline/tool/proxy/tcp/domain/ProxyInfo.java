@@ -1,7 +1,11 @@
 package com.blueline.tool.proxy.tcp.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
+/**
+ * 代理具体信息
+ * @author Gaoyang
+ *
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ProxyInfo{
     public String getId() {

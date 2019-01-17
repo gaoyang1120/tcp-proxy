@@ -10,16 +10,19 @@
         <RollingFile name="RUN-LOG" fileName="${LOG_HOME}/proxy-log/current.log"
                      filePattern="${LOG_HOME}/proxy-log/$${date:yyyy-MM}/proxy_%d{yyyyMMdd}.log">
             <!--<ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>-->
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level - %msg%n"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss,SSS}:%4p %t (%F:%L) - %m%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
                 <!--<SizeBasedTriggeringPolicy size="100 MB"/>-->
             </Policies>
         </RollingFile>
+        
         <RollingFile name="CONFIG-LOG" fileName="${LOG_HOME}/config-log/current.log"
                      filePattern="${LOG_HOME}/config-log/$${date:yyyy-MM}/proxy_%d{yyyyMMdd}.log">
             <!--<ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"/>-->
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} - %msg%n"/>
+<!--             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} - %msg%n"/> -->
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss,SSS}:%4p %t (%F:%L) - %m%n"/>
+            
             <Policies>
                 <TimeBasedTriggeringPolicy modulate="true" interval="1"/>
                 <!--<SizeBasedTriggeringPolicy size="100 MB"/>-->
@@ -27,13 +30,16 @@
         </RollingFile>
     </appenders>
     <loggers>
+        
         <logger name="Config" level="info" additivity="false">
             <AppenderRef ref="STDOUT"/>
             <AppenderRef ref="CONFIG-LOG"/>
         </logger>
+        
         <Root level="warn">
             <AppenderRef ref="STDOUT"/>
             <AppenderRef ref="RUN-LOG"/>
         </Root>
+        
     </loggers>
 </configuration>

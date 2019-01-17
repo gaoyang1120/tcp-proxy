@@ -1,8 +1,9 @@
-package com.blueline.tool.proxy.tcp.services;
+package com.blueline.tool.proxy.tcp.services.impl;
 
 
 import com.blueline.tool.proxy.tcp.domain.ProxyDefinition;
 import com.blueline.tool.proxy.tcp.handlers.ProxyInitializer;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -27,6 +28,7 @@ public class TCPNettyProxyServer extends AbstractNettyProxyServer {
 				.option(ChannelOption.SO_BACKLOG, 50)
 				.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 30*1000)
 				.option(ChannelOption.SO_REUSEADDR,true)
+//				.option(ChannelOption.SO_KEEPALIVE,true)//TODO
 				.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 				.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 				.childHandler(new ProxyInitializer(definition,trafficHandler))

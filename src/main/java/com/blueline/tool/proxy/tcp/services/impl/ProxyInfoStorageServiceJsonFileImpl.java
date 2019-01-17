@@ -1,9 +1,11 @@
-package com.blueline.tool.proxy.tcp.services;
+package com.blueline.tool.proxy.tcp.services.impl;
 
 import com.blueline.tool.proxy.tcp.domain.CreateProxyRequest;
 import com.blueline.tool.proxy.tcp.domain.ProxyDefinition;
 import com.blueline.tool.proxy.tcp.domain.ProxyInfo;
 import com.blueline.tool.proxy.tcp.runner.LoadProxyServersRunner;
+import com.blueline.tool.proxy.tcp.services.ProxyInfoStorageService;
+import com.blueline.tool.proxy.tcp.services.ServerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +15,11 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-
+/**
+ * 代理配置服务
+ * @author Gaoyang
+ *
+ */
 @Service
 public class ProxyInfoStorageServiceJsonFileImpl implements ProxyInfoStorageService {
 

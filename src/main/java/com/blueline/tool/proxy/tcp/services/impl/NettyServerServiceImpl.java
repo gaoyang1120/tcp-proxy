@@ -1,8 +1,12 @@
-package com.blueline.tool.proxy.tcp.services;
+package com.blueline.tool.proxy.tcp.services.impl;
 
 import com.blueline.tool.proxy.tcp.domain.*;
+import com.blueline.tool.proxy.tcp.services.NettyProxyServer;
+import com.blueline.tool.proxy.tcp.services.ServerService;
+
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.util.concurrent.DefaultThreadFactory;
 import io.netty.util.internal.ConcurrentSet;
 import org.springframework.stereotype.Service;
 
@@ -20,8 +24,12 @@ public class NettyServerServiceImpl implements ServerService {
 	private Map<String, NettyProxyServer> servers;
 
 	public NettyServerServiceImpl(){
+//		this.bossGroup = new NioEventLoopGroup(2);
+//		this.workerGroup = new NioEventLoopGroup(16);
+		//线程数 这里设置高些
 		this.bossGroup = new NioEventLoopGroup(2);
-		this.workerGroup = new NioEventLoopGroup(16);
+		this.workerGroup = new NioEventLoopGroup(4);
+		
 		this.servers = new ConcurrentHashMap<String, NettyProxyServer>();
 	}
 

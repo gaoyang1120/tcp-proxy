@@ -1,18 +1,27 @@
 package com.blueline.tool.proxy.tcp.controllers;
 
-import com.blueline.tool.proxy.tcp.domain.ConnectionStats;
-import com.blueline.tool.proxy.tcp.domain.CreateProxyRequest;
-import com.blueline.tool.proxy.tcp.domain.ProxyDefinition;
-import com.blueline.tool.proxy.tcp.services.ProxyInfoStorageService;
-import com.blueline.tool.proxy.tcp.services.ServerService;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
+import com.blueline.tool.proxy.tcp.domain.ConnectionStats;
+import com.blueline.tool.proxy.tcp.domain.CreateProxyRequest;
+import com.blueline.tool.proxy.tcp.domain.ProxyDefinition;
+import com.blueline.tool.proxy.tcp.domain.machine.NodeCache;
+import com.blueline.tool.proxy.tcp.domain.machine.NodeListCache;
+import com.blueline.tool.proxy.tcp.services.ProxyInfoStorageService;
+import com.blueline.tool.proxy.tcp.services.ServerService;
 
 
 @RestController
@@ -20,7 +29,7 @@ import java.util.Map;
 public class ServerController {
 
     Logger logger = LoggerFactory.getLogger(ServerController.class);
-    Logger configLogger = LoggerFactory.getLogger("Config");
+//    Logger configLogger = LoggerFactory.getLogger("Config");
 
     private ServerService service;
 
@@ -39,7 +48,8 @@ public class ServerController {
             ProxyDefinition definition = service.createServer(createProxyRequest);
             storageService.saveProxyInfo(definition);
             response = new ResponseEntity(definition, HttpStatus.CREATED);
-            configLogger.info("{} - {}","CREATED",createProxyRequest);
+            logger.info("{} - {}","CREATED",createProxyRequest);
+            NodeListCache.addNode(definition.getId());
         } catch (Exception e) {
             response = new ResponseEntity(createProxyRequest, HttpStatus.UNPROCESSABLE_ENTITY);
             logger.warn("{}:{}", e.getMessage(), createProxyRequest);
@@ -49,12 +59,34 @@ public class ServerController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/{id}", produces = "application/json")
     public ResponseEntity getProxyDefinition(@PathVariable("id") String id) {
-        return new ResponseEntity(service.getProxyDefinition(id), HttpStatus.OK);
+    	logger.info("获取单个策略----------需要找到机器列表");
+    	ProxyDefinition proxyDefinition = service.getProxyDefinition(id);
+    	logger.info("info:"+ proxyDefinition.toString());
+        return new ResponseEntity(proxyDefinition, HttpStatus.OK);
     }
+    
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}/workers", produces = "application/json")
+    public ResponseEntity getWorkers(@PathVariable("id") String id) {
+    	logger.info("获取----------------------需要找到机器列表");
+    	Map<String, Object> map = new HashMap<String, Object>();
+    	map.put("total", NodeListCache.getNodeListCache().get(id).total);
+    	map.put("offline", NodeListCache.getNodeListCache().get(id).offline);
+    	map.put("online", NodeListCache.getNodeListCache().get(id).online);
+    	map.put("ChannelSize", NodeListCache.getNodeListCache().get(id).getActiveChannelCache().size());
+    	map.put("machines", NodeListCache.getNodeListCache().get(id).getRegesterMachineIpCache());
+    	map.put("offlineMachines", NodeListCache.getNodeListCache().get(id).getOfflineMachineIpCache());
+        return new ResponseEntity(map, HttpStatus.OK);
+    }
+    
 
     @RequestMapping(method = RequestMethod.GET, produces = "application/json")
     public ResponseEntity listServers() {
-        return new ResponseEntity(service.listServers(), HttpStatus.OK);
+    	logger.info("获取策略列表");
+    	Set<ProxyDefinition> listServers = service.listServers();
+    	for(ProxyDefinition p:listServers) {
+    		logger.info("info:"+ p.toString());
+    	}
+        return new ResponseEntity(listServers, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/{id}/status")
@@ -68,7 +100,7 @@ public class ServerController {
         }
 
         storageService.saveProxyInfo(service.getProxyDefinition(id));
-        configLogger.info("{} - {}","UPDATE",service.getProxyDefinition(id));
+        logger.info("{} - {}","UPDATE",service.getProxyDefinition(id));
         return new ResponseEntity(HttpStatus.OK);
     }
 
@@ -84,7 +116,7 @@ public class ServerController {
         }
 
         storageService.saveProxyInfo(service.getProxyDefinition(id));
-        configLogger.info("{} - {}","UPDATE",service.getProxyDefinition(id));
+        logger.info("{} - {}","UPDATE",service.getProxyDefinition(id));
         return new ResponseEntity(HttpStatus.OK);
     }
 
@@ -99,7 +131,7 @@ public class ServerController {
         ProxyDefinition proxyDefinition=service.delete(id);
         proxyDefinition.setDelete(true);
         storageService.deleteProxyInfo(proxyDefinition);
-        configLogger.info("{} - {}","DELETE",proxyDefinition);
+        logger.info("{} - {}","DELETE",proxyDefinition);
         return new ResponseEntity(HttpStatus.OK);
     }
 }

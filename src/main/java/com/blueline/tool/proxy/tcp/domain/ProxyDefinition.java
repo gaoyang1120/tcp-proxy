@@ -2,7 +2,11 @@ package com.blueline.tool.proxy.tcp.domain;
 
 import java.util.UUID;
 
-
+/**
+ * 代理信息
+ * @author Gaoyang
+ *
+ */
 public class ProxyDefinition extends ProxyInfo {
     //	private String alias;
     private final long startedTime;
